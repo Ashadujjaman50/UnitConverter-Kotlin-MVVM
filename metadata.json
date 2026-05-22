@@ -1,0 +1,6 @@
+{
+  "name": "UniConvert",
+  "description": "A elegant, offline-first Unit Converter built with modern Jetpack Compose & MVVM architecture. Integrates local Room storage for historical conversion logging and custom category additions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
