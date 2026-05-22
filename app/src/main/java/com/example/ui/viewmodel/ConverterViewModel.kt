@@ -10,8 +10,23 @@ import com.example.data.repository.ConverterRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+enum class ThemeMode {
+    SYSTEM, LIGHT, DARK
+}
+
+enum class AppLanguage {
+    ENGLISH, SPANISH, FRENCH, GERMAN, BANGLA
+}
+
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ConverterViewModel(private val repository: ConverterRepository) : ViewModel() {
+
+    // --- Control Settings States ---
+    private val _themeMode = MutableStateFlow(ThemeMode.SYSTEM)
+    val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
+
+    private val _appLanguage = MutableStateFlow(AppLanguage.ENGLISH)
+    val appLanguage: StateFlow<AppLanguage> = _appLanguage.asStateFlow()
 
     // --- State Streams ---
     val allCategories: StateFlow<List<CategoryEntity>> = repository.allCategoriesFlow
@@ -55,6 +70,18 @@ class ConverterViewModel(private val repository: ConverterRepository) : ViewMode
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
     init {
+        // Load settings from persistent repository
+        _themeMode.value = try {
+            ThemeMode.valueOf(repository.getThemeMode())
+        } catch (e: Exception) {
+            ThemeMode.SYSTEM
+        }
+        _appLanguage.value = try {
+            AppLanguage.valueOf(repository.getAppLanguage())
+        } catch (e: Exception) {
+            AppLanguage.ENGLISH
+        }
+
         viewModelScope.launch {
             repository.initializeDefaultsIfNeeded()
             
@@ -90,6 +117,16 @@ class ConverterViewModel(private val repository: ConverterRepository) : ViewMode
     }
 
     // --- Action Methods ---
+
+    fun setThemeMode(mode: ThemeMode) {
+        _themeMode.value = mode
+        repository.setThemeMode(mode.name)
+    }
+
+    fun setAppLanguage(language: AppLanguage) {
+        _appLanguage.value = language
+        repository.setAppLanguage(language.name)
+    }
 
     fun selectCategory(category: CategoryEntity) {
         _selectedCategory.value = category

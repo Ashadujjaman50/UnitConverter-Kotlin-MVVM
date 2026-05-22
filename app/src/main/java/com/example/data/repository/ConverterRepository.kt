@@ -1,5 +1,6 @@
 package com.example.data.repository
 
+import android.content.Context
 import com.example.data.dao.ConverterDao
 import com.example.data.entities.CategoryEntity
 import com.example.data.entities.HistoryEntity
@@ -8,7 +9,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-class ConverterRepository(private val converterDao: ConverterDao) {
+class ConverterRepository(private val converterDao: ConverterDao, private val context: Context) {
+
+    private val prefs = context.getSharedPreferences("uniconvert_prefs", Context.MODE_PRIVATE)
+
+    fun getThemeMode(): String {
+        return prefs.getString("theme_mode", "SYSTEM") ?: "SYSTEM"
+    }
+
+    fun setThemeMode(mode: String) {
+        prefs.edit().putString("theme_mode", mode).apply()
+    }
+
+    fun getAppLanguage(): String {
+        return prefs.getString("app_language", "ENGLISH") ?: "ENGLISH"
+    }
+
+    fun setAppLanguage(language: String) {
+        prefs.edit().putString("app_language", language).apply()
+    }
 
     val allCategoriesFlow: Flow<List<CategoryEntity>> = converterDao.getAllCategoriesFlow()
     val enabledCategoriesFlow: Flow<List<CategoryEntity>> = converterDao.getEnabledCategoriesFlow()

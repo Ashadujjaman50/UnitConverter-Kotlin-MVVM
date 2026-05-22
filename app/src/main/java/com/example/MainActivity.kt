@@ -24,12 +24,16 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.data.database.ConverterDatabase
 import com.example.data.repository.ConverterRepository
+import com.example.ui.components.ControlScreen
 import com.example.ui.components.ConverterScreen
 import com.example.ui.components.HistoryScreen
+import com.example.ui.components.LanguageResources
 import com.example.ui.components.SettingsScreen
 import com.example.ui.theme.MyApplicationTheme
+import com.example.ui.viewmodel.AppLanguage
 import com.example.ui.viewmodel.ConverterViewModel
 import com.example.ui.viewmodel.ConverterViewModelFactory
+import com.example.ui.viewmodel.ThemeMode
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -37,15 +41,24 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
-                // Initialize database, repository and ViewModel inside compose cleanly
-                val context = LocalContext.current
-                val database = remember { ConverterDatabase.getDatabase(context.applicationContext) }
-                val repository = remember { ConverterRepository(database.converterDao()) }
-                val viewModel: ConverterViewModel = viewModel(
-                    factory = ConverterViewModelFactory(repository)
-                )
+            // Initialize database, repository and ViewModel inside compose cleanly
+            val context = LocalContext.current
+            val database = remember { ConverterDatabase.getDatabase(context.applicationContext) }
+            val repository = remember { ConverterRepository(database.converterDao(), context.applicationContext) }
+            val viewModel: ConverterViewModel = viewModel(
+                factory = ConverterViewModelFactory(repository)
+            )
 
+            val currentTheme by viewModel.themeMode.collectAsState()
+            val currentLanguage by viewModel.appLanguage.collectAsState()
+
+            val darkTheme = when (currentTheme) {
+                ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+
+            MyApplicationTheme(darkTheme = darkTheme) {
                 var activeTab by remember { mutableStateOf(0) }
 
                 Scaffold(
@@ -55,7 +68,7 @@ class MainActivity : ComponentActivity() {
                             title = {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
-                                        text = "UniConvert",
+                                        text = LanguageResources.getString(currentLanguage, "app_title"),
                                         fontWeight = FontWeight.Black,
                                         letterSpacing = 1.sp,
                                         style = MaterialTheme.typography.titleLarge
@@ -73,7 +86,7 @@ class MainActivity : ComponentActivity() {
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "Offline Local Database Active",
+                                            text = LanguageResources.getString(currentLanguage, "offline_status"),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                             fontSize = 9.sp
@@ -98,11 +111,11 @@ class MainActivity : ComponentActivity() {
                                 onClick = { activeTab = 0 },
                                 icon = {
                                     Icon(
-                                        imageVector = if (activeTab == 0) Icons.Default.Scale else Icons.Default.Scale,
+                                        imageVector = Icons.Default.Scale,
                                         contentDescription = "Converter"
                                     )
                                 },
-                                label = { Text("Converter") },
+                                label = { Text(LanguageResources.getString(currentLanguage, "converter")) },
                                 modifier = Modifier.testTag("nav_tab_converter")
                             )
 
@@ -115,7 +128,7 @@ class MainActivity : ComponentActivity() {
                                         contentDescription = "History Logs"
                                     )
                                 },
-                                label = { Text("History") },
+                                label = { Text(LanguageResources.getString(currentLanguage, "history")) },
                                 modifier = Modifier.testTag("nav_tab_history")
                             )
 
@@ -128,8 +141,21 @@ class MainActivity : ComponentActivity() {
                                         contentDescription = "Customize Settings"
                                     )
                                 },
-                                label = { Text("Customize") },
+                                label = { Text(LanguageResources.getString(currentLanguage, "customize")) },
                                 modifier = Modifier.testTag("nav_tab_customize")
+                            )
+
+                            NavigationBarItem(
+                                selected = activeTab == 3,
+                                onClick = { activeTab = 3 },
+                                icon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Tune,
+                                        contentDescription = "Control Preferences"
+                                    )
+                                },
+                                label = { Text(LanguageResources.getString(currentLanguage, "control")) },
+                                modifier = Modifier.testTag("nav_tab_control")
                             )
                         }
                     }
@@ -146,6 +172,7 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToConverter = { activeTab = 0 }
                             )
                             2 -> SettingsScreen(viewModel = viewModel)
+                            3 -> ControlScreen(viewModel = viewModel)
                         }
                     }
                 }
