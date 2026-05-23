@@ -36,10 +36,10 @@ interface ConverterDao {
     @Query("SELECT * FROM units")
     suspend fun getAllUnits(): List<UnitEntity>
 
-    @Query("SELECT * FROM units WHERE categoryId = :categoryId")
+    @Query("SELECT * FROM units WHERE categoryId = :categoryId ORDER BY factorToBase ASC")
     suspend fun getUnitsByCategory(categoryId: String): List<UnitEntity>
 
-    @Query("SELECT * FROM units WHERE categoryId = :categoryId")
+    @Query("SELECT * FROM units WHERE categoryId = :categoryId ORDER BY factorToBase ASC")
     fun getUnitsByCategoryFlow(categoryId: String): Flow<List<UnitEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -106,8 +106,8 @@ class ConverterRepository(private val converterDao: ConverterDao, private val co
             UnitEntity("AREA_ha", "AREA", "Hectare", "ha", 10000.0),
 
             // ---- Time ----
-            UnitEntity("TIME_s", "TIME", "Second", "s", 1.0),
             UnitEntity("TIME_ms", "TIME", "Millisecond", "ms", 0.001),
+            UnitEntity("TIME_s", "TIME", "Second", "s", 1.0),
             UnitEntity("TIME_min", "TIME", "Minute", "min", 60.0),
             UnitEntity("TIME_hr", "TIME", "Hour", "h", 3600.0),
             UnitEntity("TIME_day", "TIME", "Day", "d", 86400.0),
@@ -156,12 +156,12 @@ class ConverterRepository(private val converterDao: ConverterDao, private val co
 
             // ---- Data ----
             UnitEntity("DATA_b", "DATA", "Byte", "B", 1.0),
+            UnitEntity("DATA_kbit", "DATA", "Kilobit", "Kb", 128.0),
             UnitEntity("DATA_kb", "DATA", "Kilobyte", "KB", 1024.0),
+            UnitEntity("DATA_mbit", "DATA", "Megabit", "Mb", 131072.0),
             UnitEntity("DATA_mb", "DATA", "Megabyte", "MB", 1048576.0),
             UnitEntity("DATA_gb", "DATA", "Gigabyte", "GB", 1073741824.0),
             UnitEntity("DATA_tb", "DATA", "Terabyte", "TB", 1099511627776.0),
-            UnitEntity("DATA_kbit", "DATA", "Kilobit", "Kb", 128.0),
-            UnitEntity("DATA_mbit", "DATA", "Megabit", "Mb", 131072.0),
 
             // ---- Torque ----
             UnitEntity("TORQUE_nm", "TORQUE", "Newton-meter", "N·m", 1.0),

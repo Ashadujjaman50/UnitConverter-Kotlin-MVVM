@@ -93,7 +93,8 @@ object LanguageResources {
             "age_total_weeks" to "Total Weeks",
             "age_total_hours" to "Total Hours",
             "age_total_minutes" to "Total Minutes",
-            "age_total_months" to "Total Months"
+            "age_total_months" to "Total Months",
+            "age_total_seconds" to "Total Seconds"
         ),
         AppLanguage.SPANISH to mapOf(
             "app_title" to "UniConvert",
@@ -184,7 +185,8 @@ object LanguageResources {
             "age_total_weeks" to "Semanas Totales",
             "age_total_hours" to "Horas Totales",
             "age_total_minutes" to "Minutos Totales",
-            "age_total_months" to "Meses Totales"
+            "age_total_months" to "Meses Totales",
+            "age_total_seconds" to "Segundos Totales"
         ),
         AppLanguage.FRENCH to mapOf(
             "app_title" to "UniConvert",
@@ -275,7 +277,8 @@ object LanguageResources {
             "age_total_weeks" to "Semaines Totales",
             "age_total_hours" to "Heures Totales",
             "age_total_minutes" to "Minutes Totales",
-            "age_total_months" to "Mois Totaux"
+            "age_total_months" to "Mois Totaux",
+            "age_total_seconds" to "Secondes Totales"
         ),
         AppLanguage.GERMAN to mapOf(
             "app_title" to "UniConvert",
@@ -366,7 +369,8 @@ object LanguageResources {
             "age_total_weeks" to "Wochen Gesamt",
             "age_total_hours" to "Stunden Gesamt",
             "age_total_minutes" to "Minuten Gesamt",
-            "age_total_months" to "Monate Gesamt"
+            "age_total_months" to "Monate Gesamt",
+            "age_total_seconds" to "Sekunden Gesamt"
         ),
         AppLanguage.BANGLA to mapOf(
             "app_title" to "UniConvert",
@@ -457,7 +461,8 @@ object LanguageResources {
             "age_total_weeks" to "সর্বমোট সপ্তাহ",
             "age_total_hours" to "সর্বমোট ঘন্টা",
             "age_total_minutes" to "সর্বমোট মিনিট",
-            "age_total_months" to "সর্বমোট মাস"
+            "age_total_months" to "সর্বমোট মাস",
+            "age_total_seconds" to "সর্বমোট সেকেন্ড"
         )
     )
 
