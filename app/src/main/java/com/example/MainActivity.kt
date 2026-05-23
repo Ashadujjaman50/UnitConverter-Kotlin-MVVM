@@ -5,9 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -165,14 +167,77 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(innerPadding)
                     ) {
-                        when (activeTab) {
-                            0 -> ConverterScreen(viewModel = viewModel)
-                            1 -> HistoryScreen(
-                                viewModel = viewModel,
-                                onNavigateToConverter = { activeTab = 0 }
-                            )
-                            2 -> SettingsScreen(viewModel = viewModel)
-                            3 -> ControlScreen(viewModel = viewModel)
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            when (activeTab) {
+                                0 -> ConverterScreen(viewModel = viewModel)
+                                1 -> HistoryScreen(
+                                    viewModel = viewModel,
+                                    onNavigateToConverter = { activeTab = 0 }
+                                )
+                                2 -> SettingsScreen(viewModel = viewModel)
+                                3 -> ControlScreen(viewModel = viewModel)
+                            }
+                        }
+
+                        // --- Custom Animated Toast Overlay ---
+                        // Slides in from Bottom, slides out to Right side.
+                        val customToast by viewModel.customToast.collectAsState()
+                        
+                        LaunchedEffect(customToast) {
+                            if (customToast != null) {
+                                kotlinx.coroutines.delay(2500)
+                                viewModel.clearToast()
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = customToast != null,
+                            enter = slideInVertically(
+                                initialOffsetY = { it },
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            ) + fadeIn(),
+                            exit = slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                            ) + fadeOut(),
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(horizontal = 24.dp, vertical = 20.dp)
+                                .fillMaxWidth()
+                                .testTag("custom_toast_container")
+                        ) {
+                            val msg = customToast?.message ?: ""
+                            Card(
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.inverseSurface,
+                                    contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Success",
+                                        tint = Color(0xFF73F5AF),
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = msg,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

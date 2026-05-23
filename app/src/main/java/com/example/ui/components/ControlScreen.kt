@@ -331,7 +331,7 @@ fun ControlScreen(viewModel: ConverterViewModel) {
                                 }
                                 context.startActivity(emailIntent)
                             } catch (e: Exception) {
-                                Toast.makeText(context, "No email client found", Toast.LENGTH_SHORT).show()
+                                viewModel.showToast("No email client found")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -370,7 +370,7 @@ fun ControlScreen(viewModel: ConverterViewModel) {
                 )
                 SuggestionChip(
                     onClick = {
-                        Toast.makeText(context, "You are on the latest stable build!", Toast.LENGTH_SHORT).show()
+                        viewModel.showToast("You are on the latest stable build!")
                     },
                     label = {
                         Text(

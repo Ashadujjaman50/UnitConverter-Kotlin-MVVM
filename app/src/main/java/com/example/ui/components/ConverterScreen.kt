@@ -397,7 +397,7 @@ fun ConverterScreen(
                         onClick = {
                             if (outputValue.isNotEmpty()) {
                                 clipboardManager.setText(AnnotatedString(outputValue))
-                                Toast.makeText(context, "Copied $outputValue ${selectedToUnit?.symbol} to clipboard", Toast.LENGTH_SHORT).show()
+                                viewModel.showToast("Copied $outputValue ${selectedToUnit?.symbol} to clipboard")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -416,7 +416,7 @@ fun ConverterScreen(
                         onClick = {
                             if (inputValue.isNotEmpty() && outputValue.isNotEmpty()) {
                                 viewModel.saveConversionToHistory()
-                                Toast.makeText(context, "Conversion logged offline", Toast.LENGTH_SHORT).show()
+                                viewModel.showToast("Conversion logged offline")
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -1083,7 +1083,7 @@ fun AgeCalculatorLayout(
                             fromValue = 0.0,
                             toValue = 0.0
                         )
-                        Toast.makeText(context, LanguageResources.getString(appLanguage, "logged_toast"), Toast.LENGTH_SHORT).show()
+                        viewModel.showToast(LanguageResources.getString(appLanguage, "logged_toast"))
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,

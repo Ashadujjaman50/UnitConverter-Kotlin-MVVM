@@ -112,8 +112,8 @@ class ConverterRepository(private val converterDao: ConverterDao, private val co
             UnitEntity("TIME_hr", "TIME", "Hour", "h", 3600.0),
             UnitEntity("TIME_day", "TIME", "Day", "d", 86400.0),
             UnitEntity("TIME_week", "TIME", "Week", "wk", 604800.0),
-            UnitEntity("TIME_month", "TIME", "Month", "mo", 2629746.0),
-            UnitEntity("TIME_year", "TIME", "Year", "yr", 31556952.0),
+            UnitEntity("TIME_month", "TIME", "Month", "mo", 2628000.0),
+            UnitEntity("TIME_year", "TIME", "Year", "yr", 31536000.0),
 
             // ---- Speed ----
             UnitEntity("SPEED_mps", "SPEED", "Meter per second", "m/s", 1.0),
@@ -173,10 +173,8 @@ class ConverterRepository(private val converterDao: ConverterDao, private val co
             UnitEntity("AGE_CALC_years", "AGE_CALC", "Years", "yrs", 1.0)
         )
 
-        val unitsToInsert = defaultUnits.filter { it.id !in existingUnitIds }
-        if (unitsToInsert.isNotEmpty()) {
-            converterDao.insertUnits(unitsToInsert)
-        }
+        // Always sync default units to ensure latest factors/relations are active
+        converterDao.insertUnits(defaultUnits)
     }
 
     suspend fun getUnitsByCategory(categoryId: String): List<UnitEntity> = withContext(Dispatchers.IO) {

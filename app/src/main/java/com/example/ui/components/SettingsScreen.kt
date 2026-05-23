@@ -169,7 +169,7 @@ fun SettingsScreen(
                                     IconButton(
                                         onClick = {
                                             viewModel.deleteCategory(category.id)
-                                            Toast.makeText(context, "Deleted category ${category.name}", Toast.LENGTH_SHORT).show()
+                                            viewModel.showToast("Deleted category ${category.name}")
                                         },
                                         colors = IconButtonDefaults.iconButtonColors(
                                             contentColor = MaterialTheme.colorScheme.error
@@ -185,7 +185,7 @@ fun SettingsScreen(
                                          if (!isChecked) {
                                              val currentlyEnabledCount = allCategories.count { it.enabled }
                                              if (currentlyEnabledCount <= 1) {
-                                                 Toast.makeText(context, LanguageResources.getString(appLanguage, "min_one_category"), Toast.LENGTH_SHORT).show()
+                                                 viewModel.showToast(LanguageResources.getString(appLanguage, "min_one_category"))
                                              } else {
                                                  viewModel.toggleCategoryEnabled(category)
                                              }
@@ -247,12 +247,13 @@ fun SettingsScreen(
                                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.05f),
                                     shape = RoundedCornerShape(12.dp)
                                 )
-                                .padding(12.dp)
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { isExpanded = !isExpanded },
+                                    .clickable { isExpanded = !isExpanded }
+                                    .padding(vertical = 2.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -280,27 +281,29 @@ fun SettingsScreen(
                                         colors = IconButtonDefaults.iconButtonColors(
                                             contentColor = MaterialTheme.colorScheme.primary
                                         ),
-                                        modifier = Modifier.testTag("add_unit_to_${category.id}")
+                                        modifier = Modifier.testTag("add_unit_to_${category.id}").size(36.dp)
                                     ) {
-                                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Custom Unit")
+                                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Custom Unit", modifier = Modifier.size(20.dp))
                                     }
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Icon(
                                         imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                        contentDescription = "Expand info"
+                                        contentDescription = "Expand info",
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
 
                             if (isExpanded) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.05f))
                                 Spacer(modifier = Modifier.height(4.dp))
+                                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.05f))
+                                Spacer(modifier = Modifier.height(2.dp))
 
                                 categoryUnits.forEach { unit ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
+                                            .padding(vertical = 2.dp),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
@@ -309,6 +312,7 @@ fun SettingsScreen(
                                                 Text(
                                                     text = unit.name,
                                                     fontWeight = FontWeight.Medium,
+                                                    style = MaterialTheme.typography.bodyMedium,
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
@@ -321,7 +325,7 @@ fun SettingsScreen(
                                             }
                                             Text(
                                                 text = "Factor base: ${unit.factorToBase}${if (unit.offset != 0.0) ", Offset: ${unit.offset}" else ""}",
-                                                style = MaterialTheme.typography.bodySmall,
+                                                fontSize = 11.sp,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                                             )
                                         }
@@ -330,21 +334,21 @@ fun SettingsScreen(
                                             IconButton(
                                                 onClick = {
                                                     viewModel.deleteUnit(unit.id)
-                                                    Toast.makeText(context, "Deleted custom unit ${unit.name}", Toast.LENGTH_SHORT).show()
+                                                    viewModel.showToast("Deleted custom unit ${unit.name}")
                                                 },
                                                 colors = IconButtonDefaults.iconButtonColors(
                                                     contentColor = MaterialTheme.colorScheme.error
                                                 ),
-                                                modifier = Modifier.testTag("delete_unit_${unit.id}")
+                                                modifier = Modifier.testTag("delete_unit_${unit.id}").size(32.dp)
                                             ) {
-                                                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete customs module")
+                                                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete customs module", modifier = Modifier.size(16.dp))
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                     }
                 }
             }
@@ -441,7 +445,7 @@ fun SettingsScreen(
                             onClick = {
                                 if (catName.trim().isNotEmpty()) {
                                     viewModel.addCustomCategory(catName.trim(), iconSelection[selectedIconIndex])
-                                    Toast.makeText(context, "Added category ${catName.trim()}", Toast.LENGTH_SHORT).show()
+                                    viewModel.showToast("Added category ${catName.trim()}")
                                     showAddCategoryDialog = false
                                 }
                             },
@@ -554,7 +558,7 @@ fun SettingsScreen(
                                         factorToBase = parsedFactor,
                                         offset = parsedOffset
                                     )
-                                    Toast.makeText(context, "Added custom unit ${unitName.trim()}", Toast.LENGTH_SHORT).show()
+                                    viewModel.showToast("Added custom unit ${unitName.trim()}")
                                     showAddUnitDialog = false
                                 }
                             },

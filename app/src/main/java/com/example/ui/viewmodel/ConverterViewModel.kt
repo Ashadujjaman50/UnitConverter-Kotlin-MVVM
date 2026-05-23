@@ -18,8 +18,22 @@ enum class AppLanguage {
     ENGLISH, SPANISH, FRENCH, GERMAN, BANGLA
 }
 
+data class CustomToastMessage(val message: String, val id: Long = System.nanoTime())
+
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ConverterViewModel(private val repository: ConverterRepository) : ViewModel() {
+
+    // --- Custom Animated Toast/Snackbar state ---
+    private val _customToast = MutableStateFlow<CustomToastMessage?>(null)
+    val customToast: StateFlow<CustomToastMessage?> = _customToast.asStateFlow()
+
+    fun showToast(message: String) {
+        _customToast.value = CustomToastMessage(message)
+    }
+
+    fun clearToast() {
+        _customToast.value = null
+    }
 
     // --- Control Settings States ---
     private val _themeMode = MutableStateFlow(ThemeMode.SYSTEM)
