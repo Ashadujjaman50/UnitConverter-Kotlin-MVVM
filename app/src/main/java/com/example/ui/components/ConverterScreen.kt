@@ -55,6 +55,11 @@ fun getCategoryIcon(iconName: String): ImageVector {
         "schedule" -> Icons.Default.Schedule
         "bolt" -> Icons.Default.Bolt
         "star" -> Icons.Default.Star
+        "air" -> Icons.Default.Air
+        "flash" -> Icons.Default.FlashOn
+        "storage" -> Icons.Default.Storage
+        "build" -> Icons.Default.Build
+        "cake" -> Icons.Default.Cake
         else -> Icons.Default.Build
     }
 }

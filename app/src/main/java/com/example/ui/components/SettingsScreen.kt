@@ -40,6 +40,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val allCategories by viewModel.allCategories.collectAsStateWithLifecycle()
     val allUnits by viewModel.allUnits.collectAsStateWithLifecycle()
+    val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
 
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var showAddUnitDialog by remember { mutableStateOf(false) }
@@ -180,7 +181,18 @@ fun SettingsScreen(
 
                                 Switch(
                                     checked = category.enabled,
-                                    onCheckedChange = { viewModel.toggleCategoryEnabled(category) },
+                                    onCheckedChange = { isChecked ->
+                                         if (!isChecked) {
+                                             val currentlyEnabledCount = allCategories.count { it.enabled }
+                                             if (currentlyEnabledCount <= 1) {
+                                                 Toast.makeText(context, LanguageResources.getString(appLanguage, "min_one_category"), Toast.LENGTH_SHORT).show()
+                                             } else {
+                                                 viewModel.toggleCategoryEnabled(category)
+                                             }
+                                         } else {
+                                             viewModel.toggleCategoryEnabled(category)
+                                         }
+                                     },
                                     modifier = Modifier.testTag("switch_category_${category.id}"),
                                     colors = SwitchDefaults.colors(
                                         checkedThumbColor = MaterialTheme.colorScheme.primary,
@@ -344,7 +356,7 @@ fun SettingsScreen(
     // --- DIALOG: CREATE CUSTOM CATEGORY ---
     if (showAddCategoryDialog) {
         var catName by remember { mutableStateOf("") }
-        val iconSelection = listOf("speed", "schedule", "bolt", "star")
+        val iconSelection = listOf("speed", "schedule", "bolt", "star", "air", "flash", "storage", "build", "cake")
         var selectedIconIndex by remember { mutableStateOf(0) }
 
         Dialog(onDismissRequest = { showAddCategoryDialog = false }) {

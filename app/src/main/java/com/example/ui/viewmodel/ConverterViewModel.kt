@@ -198,6 +198,12 @@ class ConverterViewModel(private val repository: ConverterRepository) : ViewMode
 
     fun toggleCategoryEnabled(category: CategoryEntity) {
         viewModelScope.launch {
+            if (category.enabled) {
+                val currentlyEnabledCount = repository.enabledCategoriesFlow.firstOrNull()?.size ?: 0
+                if (currentlyEnabledCount <= 1) {
+                    return@launch
+                }
+            }
             val updated = category.copy(enabled = !category.enabled)
             repository.updateCategory(updated)
             
@@ -281,6 +287,20 @@ class ConverterViewModel(private val repository: ConverterRepository) : ViewMode
     fun clearHistory() {
         viewModelScope.launch {
             repository.clearHistory()
+        }
+    }
+
+    fun saveCustomHistoryLog(categoryId: String, categoryName: String, fromUnitName: String, toUnitName: String, fromValue: Double, toValue: Double) {
+        viewModelScope.launch {
+            val history = HistoryEntity(
+                categoryId = categoryId,
+                categoryName = categoryName,
+                fromUnitName = fromUnitName,
+                toUnitName = toUnitName,
+                fromValue = fromValue,
+                toValue = toValue
+            )
+            repository.insertHistory(history)
         }
     }
 

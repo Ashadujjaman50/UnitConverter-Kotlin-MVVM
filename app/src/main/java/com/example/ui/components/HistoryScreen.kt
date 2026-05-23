@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.entities.HistoryEntity
 import com.example.ui.viewmodel.ConverterViewModel
+import com.example.ui.viewmodel.AppLanguage
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,7 +34,9 @@ fun HistoryScreen(
     modifier: Modifier = Modifier
 ) {
     val historyList by viewModel.historyList.collectAsStateWithLifecycle()
+    val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
     var showClearConfirmDialog by remember { mutableStateOf(false) }
+    var itemToDelete by remember { mutableStateOf<HistoryEntity?>(null) }
 
     Column(
         modifier = modifier
@@ -49,7 +52,7 @@ fun HistoryScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Conversion History Logs",
+                text = LanguageResources.getString(appLanguage, "history_title"),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -63,7 +66,7 @@ fun HistoryScreen(
                     ),
                     modifier = Modifier.testTag("clear_history_button")
                 ) {
-                    Icon(imageVector = Icons.Default.DeleteSweep, contentDescription = "Clear All Logs")
+                    Icon(imageVector = Icons.Default.DeleteSweep, contentDescription = LanguageResources.getString(appLanguage, "delete_all_btn"))
                 }
             }
         }
@@ -90,14 +93,14 @@ fun HistoryScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Your offline database is clear.",
+                        text = LanguageResources.getString(appLanguage, "history_empty_title"),
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Any calculations you perform in the calculator can be logged here for offline reference.",
+                        text = LanguageResources.getString(appLanguage, "history_empty_desc"),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
@@ -112,12 +115,15 @@ fun HistoryScreen(
                 items(historyList, key = { it.id }) { historyItem ->
                     HistoryItemCard(
                         item = historyItem,
+                        appLanguage = appLanguage,
                         onItemClick = {
-                            viewModel.loadHistoryItem(historyItem)
-                            onNavigateToConverter()
+                            if (historyItem.categoryId != "AGE_CALC") {
+                                viewModel.loadHistoryItem(historyItem)
+                                onNavigateToConverter()
+                            }
                         },
                         onDeleteClick = {
-                            viewModel.deleteHistoryItem(historyItem.id)
+                            itemToDelete = historyItem
                         }
                     )
                 }
@@ -129,8 +135,8 @@ fun HistoryScreen(
     if (showClearConfirmDialog) {
         AlertDialog(
             onDismissRequest = { showClearConfirmDialog = false },
-            title = { Text("Clear All Logs?") },
-            text = { Text("This will permanently delete all offline historical logs. This action is irreversible.") },
+            title = { Text(LanguageResources.getString(appLanguage, "clear_all_confirm")) },
+            text = { Text(LanguageResources.getString(appLanguage, "clear_all_desc")) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -142,12 +148,40 @@ fun HistoryScreen(
                         contentColor = MaterialTheme.colorScheme.onError
                     )
                 ) {
-                    Text("Delete Everything", fontWeight = FontWeight.Bold)
+                    Text(LanguageResources.getString(appLanguage, "delete_all_btn"), fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showClearConfirmDialog = false }) {
-                    Text("Cancel")
+                    Text(LanguageResources.getString(appLanguage, "cancel"))
+                }
+            }
+        )
+    }
+
+    // --- INDIVIDUAL HISTORY ITEM DELETE CONFIRMATION DIALOG ---
+    if (itemToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { itemToDelete = null },
+            title = { Text(LanguageResources.getString(appLanguage, "delete_log")) },
+            text = { Text(LanguageResources.getString(appLanguage, "delete_log_confirm")) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        itemToDelete?.let { viewModel.deleteHistoryItem(it.id) }
+                        itemToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text(LanguageResources.getString(appLanguage, "delete_btn"), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { itemToDelete = null }) {
+                    Text(LanguageResources.getString(appLanguage, "cancel"))
                 }
             }
         )
@@ -157,11 +191,17 @@ fun HistoryScreen(
 @Composable
 fun HistoryItemCard(
     item: HistoryEntity,
+    appLanguage: AppLanguage,
     onItemClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
     val sdf = remember { SimpleDateFormat("MMM d, h:mm a", Locale.getDefault()) }
     val timeStr = remember(item.timestamp) { sdf.format(Date(item.timestamp)) }
+    val localizedCategoryName = remember(item.categoryId, item.categoryName, appLanguage) {
+        val key = "cat_${item.categoryId.lowercase()}"
+        val localized = LanguageResources.getString(appLanguage, key)
+        if (localized.isNotEmpty()) localized else item.categoryName
+    }
 
     Card(
         modifier = Modifier
@@ -189,7 +229,23 @@ fun HistoryItemCard(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Timeline,
+                    imageVector = when (item.categoryId) {
+                        "LENGTH" -> Icons.Default.Straighten
+                        "WEIGHT" -> Icons.Default.FitnessCenter
+                        "TEMPERATURE" -> Icons.Default.Thermostat
+                        "VOLUME" -> Icons.Default.LocalDrink
+                        "AREA" -> Icons.Default.GridView
+                        "TIME" -> Icons.Default.Schedule
+                        "SPEED" -> Icons.Default.Speed
+                        "PRESSURE" -> Icons.Default.Air
+                        "FORCE" -> Icons.Default.FitnessCenter
+                        "WORK" -> Icons.Default.FlashOn
+                        "POWER" -> Icons.Default.Bolt
+                        "DATA" -> Icons.Default.Storage
+                        "TORQUE" -> Icons.Default.Build
+                        "AGE_CALC" -> Icons.Default.Cake
+                        else -> Icons.Default.Timeline
+                    },
                     contentDescription = "Measurement category symbol",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
@@ -207,7 +263,7 @@ fun HistoryItemCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = item.categoryName,
+                        text = localizedCategoryName,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.secondary
@@ -221,48 +277,68 @@ fun HistoryItemCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = formatDouble(item.fromValue),
-                        fontSize = 18.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        text = " " + item.fromUnitName.substringAfterLast("(").replace(")", ""),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Converted to",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .size(16.dp)
+                if (item.categoryId == "AGE_CALC") {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = item.fromUnitName,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = item.toUnitName,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = formatDouble(item.fromValue),
+                            fontSize = 18.sp,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = " " + item.fromUnitName.substringAfterLast("(").replace(")", ""),
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
-                    Text(
-                        text = formatDouble(item.toValue),
-                        fontSize = 18.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = " " + item.toUnitName.substringAfterLast("(").replace(")", ""),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                    )
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Converted to",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .size(16.dp)
+                        )
+
+                        Text(
+                            text = formatDouble(item.toValue),
+                            fontSize = 18.sp,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = " " + item.toUnitName.substringAfterLast("(").replace(")", ""),
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        )
+                    }
                 }
             }
 
-            // Quick swipe actions or delete button
+            // Delete button
             IconButton(
                 onClick = onDeleteClick,
                 colors = IconButtonDefaults.iconButtonColors(

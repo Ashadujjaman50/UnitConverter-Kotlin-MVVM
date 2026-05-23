@@ -33,6 +33,9 @@ interface ConverterDao {
     @Query("SELECT * FROM units ORDER BY name ASC")
     fun getAllUnitsFlow(): Flow<List<UnitEntity>>
 
+    @Query("SELECT * FROM units")
+    suspend fun getAllUnits(): List<UnitEntity>
+
     @Query("SELECT * FROM units WHERE categoryId = :categoryId")
     suspend fun getUnitsByCategory(categoryId: String): List<UnitEntity>
 
